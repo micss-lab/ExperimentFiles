@@ -1,0 +1,13 @@
+//
+// Created by Burak on 05/03/2025.
+//
+
+#ifndef SCALERAGENTENVIRONMENT_HPP
+#define SCALERAGENTENVIRONMENT_HPP
+
+
+
+
+
+
+#endif //SCALERAGENTENVIRONMENT_HPP
