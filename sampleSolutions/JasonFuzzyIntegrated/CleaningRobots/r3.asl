@@ -1,0 +1,252 @@
+// mars robot 1
+
+/* Initial beliefs */
+
+//batteryPower(-1).
+//vacuumBag(-1). 
+//dirtIntensity(-1).
+
+
+at(P) :- pos(P,X,Y) & pos(r3,X,Y).
+
+/* Initial goal */
+
+!check(slots).  // disabled for now.
+
+/* Plans */
+
+//+!check(slots) : true // not garbage(r3)
+//   <- next(slotRev);
+//      !check(slots).
+//+!check(slots).
+
+
++!check(slots) : not garbage(r3) 
+   <- next(slotRev);
+      !check(slots).
+
+
+
+
+
++!check(slots) : garbage(r3) & ((not pos(r3,8,7)) | continue(r3,true)[source(r1)])  & vacuumBagFull(r3,K) & K==empty &  batteryCharge(r3,BR3) & BR3==full
+   <-.print("Slot R3-1"); startTimePeriod;next(slotRev);checkStatus; -+planCounter(0); !arrangeVacuumPower1[fuzzy];!check(slots).				
+   
+   
+   
+      
+   
++!check(slots) : (  garbage(r3) & pos(r3,8,7) & ((vacuumBagFull(r3,MK) & MK==full) | ( batteryCharge(r3, BR3) & BR3==depleted))  ) 
+ <-  .print("Slot R3-4"); .send(r3,tell,continue(r1,true)); .send(r2,tell,moveCount(r3,2)).  //;  R3 can NOT move further, yet arrives right on the 8,7 and has finished its area.   
+   
+   
++!check(slots) : (garbage(r3) & pos(r3,8,7) & ((vacuumBagFull(r3,KK) & KK==empty) | ( batteryCharge(r3, BR3) & BR3==full))       )
+ <-  .print("Slot R3-2"); .send(r1,tell,continue(r1,true)); .send(r2,tell,moveCount(r3,1)).    //   R3 can move further, yet arrives it has finished its area.
+  
+  
+   
+ +!check(slots) : (garbage(r3)  & (vacuumBagFull(r3,KI) & KI==full) | ( batteryCharge(r3, BR3) & BR3==depleted))
+ <-  .print("Slot R3-3"); .send(r1,tell,continue(r1,true)); .send(r2,tell,moveCount(r3,2)).    //  R3 cannot move any further.
+
+   
+
+   
+   
+   
+
++!check(slots)<-.print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRruns R3").
+
+
++continue(r3,true)[source(r1)] : not .desire(check(slots))            
+   <- .print("  MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMessage from R1");!check(slots).  
+
+
+//@lg[atomic]
+//+garbage(r3) : not .desire(carry_to(r2))
+ //  <-  burn(garb);!check(slots).
+   
+
+/*
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(min))  <- .print("RULE 1"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(mid))  <- .print("RULE 2"); burnGarb(70,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(max))  <- .print("RULE 3"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(min))  <- .print("RULE 4"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(mid))  <- .print("RULE 5"); burnGarb(70,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(max))  <- .print("RULE 6"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(min))  <- .print("RULE 7"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(mid))  <- .print("RULE 8"); burnGarb(70,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(max))  <- .print("RULE 9"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(min))  <- .print("RULE 10"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(mid))  <- .print("RULE 11"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(max))  <- .print("RULE 12"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 13"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 14"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 15"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 16"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(mid))  <- .print("RULE 17"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(max)) <- .print("RULE 18"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(min))  <- .print("RULE 19"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(mid)) <- .print("RULE 20"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(max)) <- .print("RULE 21"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(min))  <- .print("RULE 22"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(mid))  <- .print("RULE 23"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 24"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 25"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(mid))  <- .print("RULE 26"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 27"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
+*/
+   
+  /*
++!arrangeVacuumPower1[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(min))   <- .print("RULE 1"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower2[fuzzy].
++!arrangeVacuumPower2[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(mid))   <- .print("RULE 2"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower3[fuzzy].
++!arrangeVacuumPower3[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(max))   <- .print("RULE 3"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower4[fuzzy].
++!arrangeVacuumPower4[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 4"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower5[fuzzy].
++!arrangeVacuumPower5[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 5"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower6[fuzzy].
++!arrangeVacuumPower6[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 6"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower7[fuzzy].
++!arrangeVacuumPower7[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 7"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower8[fuzzy].
++!arrangeVacuumPower8[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(mid))   <- .print("RULE 8"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower9[fuzzy].
++!arrangeVacuumPower9[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 9"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower10[fuzzy].
++!arrangeVacuumPower10[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(min))   <- .print("RULE 10"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower11[fuzzy].
++!arrangeVacuumPower11[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(mid))   <- .print("RULE 11"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower12[fuzzy].
++!arrangeVacuumPower12[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(max))   <- .print("RULE 12"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower13[fuzzy].
++!arrangeVacuumPower13[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 13"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower14[fuzzy].
++!arrangeVacuumPower14[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 14"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower15[fuzzy].
++!arrangeVacuumPower15[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 15"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower[fuzzy].
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 16"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(mid))  <- .print("RULE 17"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(max)) <- .print("RULE 18"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(min))  <- .print("RULE 19"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(mid)) <- .print("RULE 20"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(max)) <- .print("RULE 21"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(min))  <- .print("RULE 22"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(mid))  <- .print("RULE 23"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 24"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 25"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(mid))  <- .print("RULE 26"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 27"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
+*/
+
+
+
+
+
+
+
+
+// 15-27
+/*
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(min))  <- .print("RULE 1"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(mid))  <- .print("RULE 2"); burnGarb(70,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); .
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(max))  <- .print("RULE 3"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(min))  <- .print("RULE 4"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(mid))  <- .print("RULE 5"); burnGarb(70,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(max))  <- .print("RULE 6"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(min))  <- .print("RULE 7"); burnGarb(50,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(mid))  <- .print("RULE 8"); burnGarb(70,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(max))  <- .print("RULE 9"); burnGarb(90,1); .wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(min))  <- .print("RULE 10"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(mid))  <- .print("RULE 11"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(max))  <- .print("RULE 12"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 13"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 14"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
++!arrangeVacuumPower15[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 15"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower16[fuzzy].
++!arrangeVacuumPower16[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 16"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower17[fuzzy].
++!arrangeVacuumPower17[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(mid))   <- .print("RULE 17"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower18[fuzzy].
++!arrangeVacuumPower18[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 18"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower19[fuzzy].
++!arrangeVacuumPower19[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(min))   <- .print("RULE 19"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower20[fuzzy].
++!arrangeVacuumPower20[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(mid))   <- .print("RULE 20"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower21[fuzzy].
++!arrangeVacuumPower21[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(max))   <- .print("RULE 21"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower22[fuzzy].
++!arrangeVacuumPower22[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 22"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower23[fuzzy].
++!arrangeVacuumPower23[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 23"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower24[fuzzy].
++!arrangeVacuumPower24[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 24"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower25[fuzzy].
++!arrangeVacuumPower25[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 25"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower26[fuzzy].
++!arrangeVacuumPower26[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(mid))   <- .print("RULE 26"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower27[fuzzy].
++!arrangeVacuumPower27[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 27"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);!arrangeVacuumPower[fuzzy].
+*/
+
+
+
+
+ 
++!arrangeVacuumPower1[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(min))   <- .print("RULE 1"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower2[fuzzy].
++!arrangeVacuumPower2[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(mid))   <- .print("RULE 2"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower3[fuzzy].
++!arrangeVacuumPower3[fuzzy]: (batteryPower(min) & vacuumBag(min) & dirtIntensity(max))   <- .print("RULE 3"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower4[fuzzy].
++!arrangeVacuumPower4[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 4"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower5[fuzzy].
++!arrangeVacuumPower5[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 5"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower6[fuzzy].
++!arrangeVacuumPower6[fuzzy]: (batteryPower(min) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 6"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower7[fuzzy].
++!arrangeVacuumPower7[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 7"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower8[fuzzy].
++!arrangeVacuumPower8[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(mid))   <- .print("RULE 8"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower9[fuzzy].
++!arrangeVacuumPower9[fuzzy]: (batteryPower(min) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 9"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower10[fuzzy].
++!arrangeVacuumPower10[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(min))   <- .print("RULE 10"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower11[fuzzy].
++!arrangeVacuumPower11[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(mid))   <- .print("RULE 11"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower12[fuzzy].
++!arrangeVacuumPower12[fuzzy]: (batteryPower(mid) & vacuumBag(min) & dirtIntensity(max))   <- .print("RULE 12"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower13[fuzzy].
++!arrangeVacuumPower13[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 13"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower14[fuzzy].
++!arrangeVacuumPower14[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 14"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower15[fuzzy].
++!arrangeVacuumPower15[fuzzy]: (batteryPower(mid) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 15"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower16[fuzzy].
++!arrangeVacuumPower16[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 16"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower17[fuzzy].
++!arrangeVacuumPower17[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(mid))   <- .print("RULE 17"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower18[fuzzy].
++!arrangeVacuumPower18[fuzzy]: (batteryPower(mid) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 18"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower19[fuzzy].
++!arrangeVacuumPower19[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(min))   <- .print("RULE 19"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower20[fuzzy].
++!arrangeVacuumPower20[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(mid))   <- .print("RULE 20"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower21[fuzzy].
++!arrangeVacuumPower21[fuzzy]: (batteryPower(max) & vacuumBag(min) & dirtIntensity(max))   <- .print("RULE 21"); burnGarb(90,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower22[fuzzy].
++!arrangeVacuumPower22[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(min))   <- .print("RULE 22"); burnGarb(50,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower23[fuzzy].
++!arrangeVacuumPower23[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(mid))   <- .print("RULE 23"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower24[fuzzy].
++!arrangeVacuumPower24[fuzzy]: (batteryPower(max) & vacuumBag(mid) & dirtIntensity(max))   <- .print("RULE 24"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower25[fuzzy].
++!arrangeVacuumPower25[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(min))   <- .print("RULE 25"); burnGarb(70,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower26[fuzzy].
++!arrangeVacuumPower26[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(mid))   <- .print("RULE 26"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1); !arrangeVacuumPower27[fuzzy].
++!arrangeVacuumPower27[fuzzy]: (batteryPower(max) & vacuumBag(max) & dirtIntensity(max))   <- .print("RULE 27"); burnGarb(100,1);.wait(1); ?planCounter(MM); CC = MM+1; -+planCounter(CC);  saveResultR3("R3",CC);  .wait(1);.
+
+
+
+
+
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+ 
++!carry_to(R)
+   <- // remember where to go back
+      ?pos(r3,X,Y);
+      -+pos(last,X,Y);
+
+      // carry garbage to r2
+      !take(garb,R);
+
+      // goes back and continue to check
+      !at(last);
+      !check(slots).
+	  
++!take(S,L) : true
+   <- !ensure_pick(S);
+      !at(L);
+      dropRev(S).
+
++!ensure_pick(S) : garbage(r3)
+   <- pickRev(garb);
+      !ensure_pick(S).
++!ensure_pick(_).
+
++!at(L) : at(L).
++!at(L) <- ?pos(L,X,Y);
+           move_towardsRev(X,Y);
+           !at(L).
+
+
+
